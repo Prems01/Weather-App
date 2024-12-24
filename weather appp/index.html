@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body>
+    <div class="card">
+        <!-- Search Section -->
+        <div class="search">
+            <input type="text" placeholder="Enter city name" spellcheck="false">
+            <button><i class='bx bx-search'></i></button>
+        </div>
+
+        <div class="error">
+            <p>Invalid city name</p>
+        </div>
+        <!-- Weather Info Section -->
+        <div class="weather">
+            <img src="images/rain.png" alt="Weather Icon" class="weather-icon">
+            <h1 class="temp">22°c</h1>
+            <h2 class="city">New York</h2>
+        </div>
+        <!-- Details Section -->
+        <div class="details">
+            <!-- Humidity Section -->
+            <div class="detail-item">
+                <img src="images/humi.png" alt="Humidity Icon" class="detail-icon">
+                <p class="label">Humidity</p>
+                <h3 class="value">50%</h3>
+            </div>
+            <!-- Wind Section -->
+            <div class="detail-item">
+                <img src="images/wind.png" alt="Wind Icon" class="detail-icon">
+                <p class="label">Wind</p>
+                <h3 class="value">10 km/hr</h3>
+            </div>
+        </div>
+    </div>
+
+
+<script>
+    const apiKey = "9a1a6787ef7fd862536f1cef6c347a61";
+const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+const searchBox = document.querySelector(".search input");
+const searchBtn = document.querySelector(".search button");
+const weatherIcon = document.querySelector(".weather-icon");
+
+async function checkWeather(city) {
+    // Handle empty input
+    if (!city.trim()) {
+        document.querySelector(".error").style.display = "block";
+        document.querySelector(".weather").style.display = "none";
+        document.querySelector(".details").style.visibility = "hidden"; // Hide details
+        document.querySelector(".error p").innerText = "Please enter a city name!";
+        return;
+    }
+
+    const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+    if (response.status === 404) {
+        document.querySelector(".error").style.display = "block";
+        document.querySelector(".weather").style.display = "none";
+        document.querySelector(".details").style.visibility = "hidden"; // Hide details
+        document.querySelector(".error p").innerText = "Invalid city name!";
+    } else {
+        const data = await response.json();
+
+        // Update weather info
+        document.querySelector(".city").innerHTML = data.name;
+        document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°c";
+        document.querySelector(".details .detail-item:nth-child(1) .value").innerHTML = data.main.humidity + "%";
+        document.querySelector(".details .detail-item:nth-child(2) .value").innerHTML = data.wind.speed + " km/hr";
+
+        // Update weather icon based on conditions
+        if (data.weather[0].main === "Clouds") {
+            weatherIcon.src = "images/cloud.png";
+        } else if (data.weather[0].main === "Clear") {
+            weatherIcon.src = "images/clear.png";
+        } else if (data.weather[0].main === "Rain") {
+            weatherIcon.src = "images/rain.png";
+        } else if (data.weather[0].main === "Drizzle") {
+            weatherIcon.src = "images/drizzle.png";
+        } else if (data.weather[0].main === "Mist") {
+            weatherIcon.src = "images/mist.png";
+        } else {
+            weatherIcon.src = "images/default.png"; // Fallback for unknown weather conditions
+        }
+
+        document.querySelector(".weather").style.display = "block";
+        document.querySelector(".error").style.display = "none";
+        document.querySelector(".details").style.visibility = "visible"; // Show details
+    }
+}
+
+
+// Add event listener for search button click
+searchBtn.addEventListener("click", () => {
+    checkWeather(searchBox.value);
+});
+
+
+   
+</script>
+
+
+
+</body>
+</html>
